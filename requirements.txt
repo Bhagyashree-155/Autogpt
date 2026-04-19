@@ -1,0 +1,6 @@
+streamlit
+groq
+requests
+flask
+flask-socketio
+gunicorn
