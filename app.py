@@ -15,7 +15,6 @@ if "chat" not in st.session_state:
 if "theme" not in st.session_state:
     st.session_state.theme = "dark"
 
-
 # ---------------- THEME FUNCTION ----------------
 def apply_theme():
     if st.session_state.theme == "dark":
@@ -37,9 +36,14 @@ def apply_theme():
         </style>
         """, unsafe_allow_html=True)
 
-
 apply_theme()
 
+# ---------------- GLOBAL THEME BUTTON ----------------
+top1, top2 = st.columns([8, 1])
+with top2:
+    if st.button("🌓"):
+        st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
+        st.rerun()
 
 # ---------------- LOGIN / SIGNUP PAGE ----------------
 if not st.session_state.logged_in:
@@ -68,26 +72,18 @@ if not st.session_state.logged_in:
             else:
                 st.error("Invalid username or password")
 
-
 # ---------------- CHATBOT PAGE ----------------
 else:
     st.title("🚀 AI Chatbot with Memory + Context")
 
-    # Top bar (theme + logout)
-    col1, col2, col3 = st.columns([4, 1, 1])
-
+    # Logout button
+    col1, col2 = st.columns([6, 1])
     with col2:
-        if st.button("🌓"):
-            st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
-            st.rerun()
-
-    with col3:
         if st.button("Logout"):
             st.session_state.logged_in = False
             st.session_state.chat = []
             st.rerun()
 
-    # Chat input
     user_input = st.chat_input("Ask anything...")
 
     if user_input:
@@ -98,7 +94,6 @@ else:
 
         st.session_state.chat.append(("Bot", response))
 
-    # Display chat messages
     for role, msg in st.session_state.chat:
         if role == "User":
             st.chat_message("user").write(msg)
