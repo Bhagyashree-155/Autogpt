@@ -1,24 +1,70 @@
 import streamlit as st
 from agent import autogpt
+from auth import login, signup
 
-st.title("🚀 AI Chatbot with Memory + Context")
+# ---------------- CONFIG ----------------
+st.set_page_config(page_title="AI Chatbot", layout="centered")
+
+# ---------------- SESSION INIT ----------------
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
 if "chat" not in st.session_state:
     st.session_state.chat = []
 
-user_input = st.chat_input("Ask anything...")
+# ---------------- LOGIN / SIGNUP PAGE ----------------
+if not st.session_state.logged_in:
 
-if user_input:
-    st.session_state.chat.append(("User", user_input))
+    st.title("🔐 AI Chatbot Login")
 
-    with st.spinner("Thinking..."):
-        response = autogpt(user_input, st.session_state.chat)
+    option = st.radio("Select Option", ["Login", "Signup"])
 
-    st.session_state.chat.append(("Bot", response))
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
 
-# Display chat
-for role, msg in st.session_state.chat:
-    if role == "User":
-        st.chat_message("user").write(msg)
-    else:
-        st.chat_message("assistant").write(msg)
+    if option == "Signup":
+        if st.button("Create Account"):
+            success, msg = signup(username, password)
+            if success:
+                st.success(msg)
+            else:
+                st.error(msg)
+
+    if option == "Login":
+        if st.button("Login"):
+            if login(username, password):
+                st.session_state.logged_in = True
+                st.success("Login successful!")
+                st.rerun()
+            else:
+                st.error("Invalid username or password")
+
+# ---------------- CHATBOT PAGE ----------------
+else:
+    st.title("🚀 AI Chatbot with Memory + Context")
+
+    # Logout button
+    col1, col2 = st.columns([6, 1])
+    with col2:
+        if st.button("Logout"):
+            st.session_state.logged_in = False
+            st.session_state.chat = []
+            st.rerun()
+
+    # Chat input
+    user_input = st.chat_input("Ask anything...")
+
+    if user_input:
+        st.session_state.chat.append(("User", user_input))
+
+        with st.spinner("Thinking..."):
+            response = autogpt(user_input, st.session_state.chat)
+
+        st.session_state.chat.append(("Bot", response))
+
+    # Display chat messages
+    for role, msg in st.session_state.chat:
+        if role == "User":
+            st.chat_message("user").write(msg)
+        else:
+            st.chat_message("assistant").write(msg)
